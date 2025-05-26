@@ -17,14 +17,21 @@ public class EventConsumer {
 
     @KafkaListener(topics = "audit-log-topic", groupId = "read-service")
     public void handleUserCreated(UserCreatedEvent event) {
-        // Optional: add logging here
         System.out.println("Received UserCreatedEvent: " + event);
 
-        UserReadModel user = new UserReadModel();
-        user.setUserId(event.getUserId());
-        user.setName(event.getName());
-        user.setEmail(event.getEmail());
-
-        repo.save(user);
+        try {
+            // Check if already exists
+            if (!repo.existsById(event.getUserId())) {
+                UserReadModel user = new UserReadModel();
+                user.setUserId(event.getUserId());
+                user.setName(event.getName());
+                user.setEmail(event.getEmail());
+                repo.save(user);
+            } else {
+                System.out.println("User already exists in read model: " + event.getUserId());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

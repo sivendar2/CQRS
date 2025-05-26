@@ -1,15 +1,15 @@
 package com.siven.event;
 
 public class UserCreatedEvent {
-    private String userId;
+    private Long userId;
     private String name;
     private String email;
 
-    public String getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 

@@ -1,20 +1,23 @@
 package com.siven.model;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "users")
+@Entity
+@Table(name="user_read1")
 public class UserReadModel {
     @Id
-    private String userId;
+    private Long userId;
     private String name;
     private String email;
 
-    public String getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 

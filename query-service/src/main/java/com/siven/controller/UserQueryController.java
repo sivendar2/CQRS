@@ -1,9 +1,7 @@
 package com.siven.controller;
 
-import com.siven.model.User;
 import com.siven.model.UserReadModel;
 import com.siven.repository.UserReadRepository;
-import com.siven.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,10 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserQueryController {
 
     @Autowired
-    private UserRepository repo;
+    private UserReadRepository repo;
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable Long id) {
+    public ResponseEntity<UserReadModel> getUser(@PathVariable Long id) {
         return repo.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

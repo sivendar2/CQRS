@@ -1,24 +1,77 @@
+version: '3.8'
 
 services:
+
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.2.1
+    image: confluentinc/cp-zookeeper:7.5.0
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
 
   kafka:
-    image: confluentinc/cp-kafka:7.2.1
+    image: confluentinc/cp-kafka:7.5.0
+    depends_on:
+      - zookeeper
     ports:
       - "9092:9092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-  app:
-    build: .
+  mysql-command:
+    image: mysql:8
+    restart: always
+    environment:
+      MYSQL_DATABASE: ems
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3307:3306"
+    volumes:
+      - command_data:/var/lib/mysql
+
+  mysql-query:
+    image: mysql:8
+    restart: always
+    environment:
+      MYSQL_DATABASE: ems
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3308:3306"
+    volumes:
+      - query_data:/var/lib/mysql
+
+  command-service:
+    build:
+      context: ./command-service
+    ports:
+      - "8080:8080"
     depends_on:
       - kafka
+      - mysql-command
     environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-command:3306/ems
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: password
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+  query-service:
+    build:
+      context: ./query-service
+    ports:
+      - "8081:8080"
+    depends_on:
+      - kafka
+      - mysql-query
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-query:3306/ems
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+volumes:
+  command_data:
+  query_data:
