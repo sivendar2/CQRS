@@ -26,6 +26,10 @@ public class EventConsumer {
                 user.setUserId(event.getUserId());
                 user.setName(event.getName());
                 user.setEmail(event.getEmail());
+                if ("fail@example.com".equalsIgnoreCase(event.getEmail())) {
+                    throw new RuntimeException("Simulated processing failure");
+                }
+
                 repo.save(user);
             } else {
                 System.out.println("User already exists in read model: " + event.getUserId());
@@ -34,4 +38,10 @@ public class EventConsumer {
             e.printStackTrace();
         }
     }
+    @KafkaListener(topics = "main-topic.DLQ", groupId = "dlq-group")
+    public void handleDLQ(UserCreatedEvent failedEvent) {
+        System.out.println("DLQ Received: " + failedEvent);
+        // Log, alert, or reprocess here
+    }
+
 }
